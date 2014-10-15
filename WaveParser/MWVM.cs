@@ -9,21 +9,27 @@ namespace WaveParser
 {
     public class MWVM
     {
-        public ICommand LoadFile;
-
+        private ICommand LoadFileInternalCommand;
         private MainWindow _window;
-        private string _path = "";
+        private Loader _loader;
+        private short[] _rawdata;
 
         public MWVM(MainWindow window)
         {
             _window = window;
+            _loader = new Loader();
 
-            LoadFile = new DelegateCommand(o =>
+            LoadFileInternalCommand = new DelegateCommand(o =>
                 {
-                    using (var sr = new StreamReader(_path))
+                    if (_window.tbUri.Text == "")
                     {
-                        
+                        MessageBox.Show("Enter URI!");
+                        return;
                     }
+                    _loader.SetPath(_window.tbUri.Text);
+                    _loader.LoadFile();
+                    _loader.SaveAsText();
+                    _rawdata = _loader.RawData;
                 });
             DrawLine(0, 0, 100, 100, 1);
         }
@@ -39,6 +45,11 @@ namespace WaveParser
             line.StrokeThickness = thickness;
             line.Tag = string.Format("Line {0} {1} {2} {3}", x1, y1, x2, y2);
             _window.Canvas.Children.Add(line);
+        }
+
+        public ICommand LoadFile
+        {
+            get { return LoadFileInternalCommand; }
         }
     }
 }
