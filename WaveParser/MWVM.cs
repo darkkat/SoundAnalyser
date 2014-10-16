@@ -1,13 +1,14 @@
-﻿using System.Collections.Generic;
-using System.IO;
+﻿using System.ComponentModel;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Shapes;
+using Microsoft.Win32;
+using WaveParser.Annotations;
 
 namespace WaveParser
 {
-    public class MWVM
+    public class MWVM : INotifyPropertyChanged
     {
         private ICommand LoadFileInternalCommand;
 
@@ -21,40 +22,29 @@ namespace WaveParser
             _loader = new Loader();
 
             LoadFileInternalCommand = new DelegateCommand(o =>
-                {
-                    if (_window.tbUri.Text == "")
             {
-                        MessageBox.Show("Enter URI!");
-                        return;
-                    }
-                    _loader.SetPath(_window.tbUri.Text);
+                var opener = new OpenFileDialog();
+                opener.Filter = @"Wave Sound (*.wav,*.wave)|*.wav;*.wave|All files(*.*)|*.*";
+                opener.FileOk += (sender, args) =>
+                {
+                    _loader.SetPath(opener.FileName);
                     _loader.LoadFile();
-                    _loader.SaveAsText();
                     _rawdata = _loader.RawData;
-                });
-            DrawLine(0, 0, 100, 100, 1);
+                    OnPropertyChanged("GraphicPoints");
+                };
+                opener.ShowDialog();
+            });
         }
 
         public PointCollection GraphicPoints
         {
             get
             {
-                return
-                    new PointCollection(new[]
-                        {
-                            new Point(0, 0),
-                            new Point(10, 30),
-                            new Point(20, 20),
-                            new Point(30, 40),
-                            new Point(40, 90),
-                            new Point(50, 180),
-                            new Point(60, 2),
-                            new Point(70, 31),
-                            new Point(80, 90),
-                            new Point(90, 432),
-                            new Point(100, 13),
-                            new Point(110, 2),
-                        });
+                var points = new PointCollection();
+                if (_rawdata == null) return points;
+                for (int i = 0; i < _rawdata.Length/10; i+=10)
+                    points.Add(new Point(i, _rawdata[i]));
+                return points;
             }
         }
 
@@ -74,6 +64,15 @@ namespace WaveParser
         public ICommand LoadFile
         {
             get { return LoadFileInternalCommand; }
+        }
+
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        [NotifyPropertyChangedInvocator]
+        protected virtual void OnPropertyChanged(string propertyName)
+        {
+            PropertyChangedEventHandler handler = PropertyChanged;
+            if (handler != null) handler(this, new PropertyChangedEventArgs(propertyName));
         }
     }
 }

@@ -17,7 +17,8 @@
             <ColumnDefinition Width="5*"/>
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
-        <Canvas Grid.Column="1" Grid.Row="1" Grid.RowSpan="3" Name="Canvas"> 
+        <Canvas Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="5" Grid.RowSpan="5" Name="Canvas" Height="0"
+          RenderTransform="1 0 0 -1 0 0"> 
             <Path Stroke="Black" StrokeThickness="1">
                 <Path.Data>
                     <PathGeometry>
@@ -32,7 +33,6 @@
                 </Path.Data>
             </Path>
         </Canvas>
-        <TextBox Grid.Column="3" Grid.Row="2" Name="tbUri" Text=""/>
-        <Button Grid.Row="3" Grid.Column="3" Content="Load" Command="{Binding LoadFile}"></Button>
+        <Button Grid.Row="3" Grid.Column="3" Content="Load" Command="{Binding LoadFile}"/>
     </Grid>
 </Window>
