@@ -1,4 +1,6 @@
-﻿using System.ComponentModel;
+﻿using System.Collections.Generic;
+using System.ComponentModel;
+using System.IO;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
@@ -14,36 +16,40 @@ namespace WaveParser
 
         private MainWindow _window;
         private Loader _loader;
+        private Modifier _modifier;
         private short[] _rawdata;
 
         public MWVM(MainWindow window)
         {
             _window = window;
             _loader = new Loader();
+            _modifier = new Modifier();
 
             LoadFileInternalCommand = new DelegateCommand(o =>
-            {
-                var opener = new OpenFileDialog();
-                opener.Filter = @"Wave Sound (*.wav,*.wave)|*.wav;*.wave|All files(*.*)|*.*";
-                opener.FileOk += (sender, args) =>
                 {
-                    _loader.SetPath(opener.FileName);
-                    _loader.LoadFile();
-                    _rawdata = _loader.RawData;
-                    OnPropertyChanged("GraphicPoints");
-                };
-                opener.ShowDialog();
-            });
+                    var opener = new OpenFileDialog();
+                    opener.Filter = @"Wave Sound (*.wav,*.wave)|*.wav;*.wave|All files(*.*)|*.*";
+                    opener.FileOk += (sender, args) =>
+                        {
+                            _loader.SetPath(opener.FileName);
+                            _loader.LoadFile();
+                            _loader.SaveAsText();
+                            _rawdata = _loader.RawData;
+
+                            OnPropertyChanged("GraphicPoints");
+                        };
+                    opener.ShowDialog();
+                });
         }
 
         public PointCollection GraphicPoints
         {
             get
             {
-                var points = new PointCollection();
+                 var points = new PointCollection();
                 if (_rawdata == null) return points;
                 for (int i = 0; i < _rawdata.Length/10; i+=10)
-                    points.Add(new Point(i, _rawdata[i]));
+                    points.Add(new Point(i, _rawdata[i]/300));
                 return points;
             }
         }
