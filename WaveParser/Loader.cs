@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -18,6 +17,19 @@ namespace WaveParser
 
         public short[] RawData { get; private set; }
 
+        // http://stackoverflow.com/questions/1215326/open-source-c-sharp-code-to-present-wave-form
+        public float[] NormalizedRawData //временно, сделаем по-людскее как-нить
+        {
+            get
+            {
+                float max = RawData.Max();
+                float[] normalized = new float[RawData.Length];
+                for (int i = 0; i < RawData.Length; i++)
+                    normalized[i] = RawData[i]/max;
+
+                return normalized;
+            }
+        }
         public Loader(string path)
         {
             SetPath(path);
