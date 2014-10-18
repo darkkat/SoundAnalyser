@@ -1,4 +1,8 @@
-﻿using System.ComponentModel;
+﻿using System.Collections.Generic;
+using System.ComponentModel;
+using System.IO;
+using System.Windows;
+using System.Windows.Input;
 using System.Drawing.Imaging;
 using System.IO;
 using System.Windows.Data;
@@ -20,6 +24,7 @@ namespace WaveParser
 
         private MainWindow _window;
         private Loader _loader;
+        private Modifier _modifier;
         private short[] _rawdata;
         private float[] _normalized;
         private Bitmap _graphic;
@@ -29,6 +34,7 @@ namespace WaveParser
         {
             _window = window;
             _loader = new Loader();
+            _modifier = new Modifier();
 
             LoadFileInternalCommand = new DelegateCommand(o =>
             {
@@ -38,10 +44,19 @@ namespace WaveParser
                 {
                     _loader.SetPath(opener.FileName);
                     _loader.LoadFile();
+                            _loader.SaveAsText();
                     _rawdata = _loader.RawData;
                     _normalized = _loader.NormalizedRawData;
                     Graphic = DrawNormalizedAudio(_normalized, Color.Green, 640, 480);
                     GraphicImage = BitmapToBitmapImage(Graphic);
+
+                            _modifier.SetPath(opener.FileName);
+                            _modifier.SetData(_rawdata);
+                            _modifier.DivideToFrames();
+                            _modifier.CalculateEnergies();
+                            _modifier.CalculateZeroCrosses();
+                            _modifier.SaveAsText("energies,crosses");
+
                     OnPropertyChanged("GraphicPoints");
                 };
                 opener.ShowDialog();
@@ -74,7 +89,7 @@ namespace WaveParser
                 var points = new PointCollection();
                 if (_rawdata == null) return points;
                 for (int i = 0; i < _rawdata.Length/10; i+=10)
-                    points.Add(new Point(i, _rawdata[i]));
+                    points.Add(new Point(i, _rawdata[i]/300));
                 return points;
             }
         }
@@ -82,7 +97,7 @@ namespace WaveParser
         {
             get { return LoadFileInternalCommand; }
         }
-        
+
         private Bitmap DrawNormalizedAudio(float[] data, Color color, int width, int height)
         {
             var bmp = new Bitmap(width, height);
@@ -99,7 +114,7 @@ namespace WaveParser
                     float min = float.MaxValue;
                     float max = float.MinValue;
                     for (int i = start; i < end; i++)
-                    {
+        {
                         float val = data[i];
                         min = val < min ? val : min;
                         max = val > max ? val : max;
@@ -115,7 +130,7 @@ namespace WaveParser
         {
             BitmapImage bitmapImage;
             using (MemoryStream memory = new MemoryStream())
-            {
+        {
                 bitmap.Save(memory, ImageFormat.Png);
                 memory.Position = 0;
                 bitmapImage = new BitmapImage();
@@ -126,7 +141,7 @@ namespace WaveParser
             }
             return bitmapImage;
         }
-        
+
         public event PropertyChangedEventHandler PropertyChanged;
         [NotifyPropertyChangedInvocator]
         protected virtual void OnPropertyChanged(string propertyName)

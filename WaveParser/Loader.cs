@@ -73,6 +73,9 @@ namespace WaveParser
             short BitsPerSample = br.ReadInt16();
             int BytesPerSample = BitsPerSample/8;
 
+            if(Channels > 2)
+                throw new NotSupportedException("Too much channels!");
+
             comp = new string(br.ReadChars(4)).ToUpper();
             while (comp != "DATA")
             {
@@ -99,7 +102,7 @@ namespace WaveParser
                 }
 
             }
-            else
+            else 
             {
                 long limit = SumCO/2;
                 for (long i = 0; i < limit; i++)

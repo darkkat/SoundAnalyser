@@ -72,6 +72,7 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Modifier.cs" />
     <Compile Include="MWVM.cs" />
     <Compile Include="Properties\Annotations.cs" />
     <Compile Include="Properties\AssemblyInfo.cs">
