@@ -36,6 +36,13 @@ namespace WaveParser
                             _loader.SaveAsText();
                             _rawdata = _loader.RawData;
 
+                            _modifier.SetPath(opener.FileName);
+                            _modifier.SetData(_rawdata);
+                            _modifier.DivideToFrames();
+                            _modifier.CalculateEnergies();
+                            _modifier.CalculateZeroCrosses();
+                            _modifier.SaveAsText("energies,crosses");
+
                             OnPropertyChanged("GraphicPoints");
                         };
                     opener.ShowDialog();
