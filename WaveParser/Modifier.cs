@@ -14,10 +14,11 @@ namespace WaveParser
         private short _minValue;
         private short _maxValue;
         private int _attitude;
+        private int _noiseEdge;
         private string _TXTpath;
 
         private List<short[]> _frames;
-        private short[] _frameEnergies;
+        private int[] _frameEnergies;
         private short[] _nullCrosses;
 
         public Modifier()
@@ -73,7 +74,7 @@ namespace WaveParser
                 }
             }
 
-            _frameEnergies = new short[_frames.Count];
+            _frameEnergies = new int[_frames.Count];
             _nullCrosses = new short[_frames.Count];
         }
 
@@ -90,10 +91,12 @@ namespace WaveParser
                     tempEnergy += frame[j];
 
                 tempEnergy /= FrameSize;
-                _frameEnergies[i] =  (tempEnergy > 0) ? (short)tempEnergy : (short)-tempEnergy;
+                _frameEnergies[i] =  (tempEnergy > 0) ? tempEnergy : -tempEnergy;
 
                 tempEnergy = 0;
             }
+
+            _noiseEdge = (_frameEnergies[0] > _frameEnergies[1]) ? _frameEnergies[0]/2 : _frameEnergies[1]/2;
         }
 
         public void CalculateZeroCrosses()
@@ -106,10 +109,8 @@ namespace WaveParser
             {
                 short[] frame = _frames[i];
                 for (int j = 1; j < FrameSize; j++)
-                {
-                    if (LessThanNull(frame[j - 1]) != LessThanNull(frame[j]))
+                    if (LessThanNull(frame[j - 1]) != LessThanNull(frame[j]) && Math.Abs(frame[j-1]-frame[j]) > _noiseEdge)
                         tempCrosses++;
-                }
 
                 _nullCrosses[i] = tempCrosses;
 
@@ -118,14 +119,14 @@ namespace WaveParser
 
         }
 
-        public void SaveAsText(string parameter)
+        public void SaveAsText(string parameterString)
         {
             using (StreamWriter sw = new StreamWriter(_TXTpath))
             {
-                string[] parameters = parameter.Split(',');
-                for (var i = 0; i < parameters.Length; i++)
+                string[] parameters = parameterString.Split(',');
+                foreach (string param in parameters)
                 {
-                    switch (parameters[i].ToLower())
+                    switch (param.ToLower())
                     {
                         case "energies":
                         case "energy":

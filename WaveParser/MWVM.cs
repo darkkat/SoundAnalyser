@@ -44,18 +44,18 @@ namespace WaveParser
                 {
                     _loader.SetPath(opener.FileName);
                     _loader.LoadFile();
-                            _loader.SaveAsText();
+                    _loader.SaveAsText();
                     _rawdata = _loader.RawData;
                     _normalized = _loader.NormalizedRawData;
                     Graphic = DrawNormalizedAudio(_normalized, Color.Green, 640, 480);
                     GraphicImage = BitmapToBitmapImage(Graphic);
 
-                            _modifier.SetPath(opener.FileName);
-                            _modifier.SetData(_rawdata);
-                            _modifier.DivideToFrames();
-                            _modifier.CalculateEnergies();
-                            _modifier.CalculateZeroCrosses();
-                            _modifier.SaveAsText("energies,crosses");
+                    _modifier.SetPath(opener.FileName);
+                    _modifier.SetData(_rawdata);
+                    _modifier.DivideToFrames();
+                    _modifier.CalculateEnergies();
+                    _modifier.CalculateZeroCrosses();
+                    _modifier.SaveAsText("energies,crosses");
 
                     OnPropertyChanged("GraphicPoints");
                 };
