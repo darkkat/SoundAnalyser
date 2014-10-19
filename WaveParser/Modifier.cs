@@ -61,16 +61,21 @@ namespace WaveParser
 
         public void DivideToFrames()
         {
+            _frames.Clear();
             var dataSize = _data.LongLength;
             var temp = new short[FrameSize];
 
+            int innerIndex = 0;
+
             for (long i = 0; i < dataSize; i++)
             {
-                temp[i%FrameSize] = _data[i];
-                if (i%FrameSize == FrameSize - 1)
+                temp[innerIndex++] = _data[i];
+                if (innerIndex == FrameSize - 1)
                 {
-                    _frames.Add(temp);
-                    temp = new short[FrameSize];
+                    _frames.Add((short[])temp.Clone());
+                    Array.Clear(temp, 0, temp.Length);
+                    i -= FrameSize/2;//to make cross-frames
+                    innerIndex = 0;
                 }
             }
 
